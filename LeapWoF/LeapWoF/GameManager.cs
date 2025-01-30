@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using LeapWoF.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace LeapWoF
 {
@@ -16,12 +18,16 @@ namespace LeapWoF
         /// </summary>
         private IInputProvider inputProvider;
 
+
         /// <summary>
         /// The output provider
         /// </summary>
         private IOutputProvider outputProvider;
+        
+        private string currentDashPuzzle;
 
         private string TemporaryPuzzle;
+
         public List<string> charGuessList = new List<string>();
 
         public GameState GameState { get; private set; }
@@ -99,12 +105,15 @@ namespace LeapWoF
         }
 
         /// <summary>
-        /// Draw the puzzle
+        /// This will show the board and display the dashes for the letters of the phrase
         /// </summary>
         private void DrawPuzzle()
         {
             outputProvider.WriteLine("The puzzle is:");
-            outputProvider.WriteLine(TemporaryPuzzle);
+            
+            currentDashPuzzle = Regex.Replace(TemporaryPuzzle,"[a-zA-Z]", "_");
+            outputProvider.WriteLine(currentDashPuzzle);
+
             outputProvider.WriteLine();
         }
 
