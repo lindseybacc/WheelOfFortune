@@ -100,6 +100,7 @@ namespace LeapWoF
                     break;
                 case "2":
                     Solve();
+               
                     break;
             }
 
@@ -131,6 +132,19 @@ namespace LeapWoF
         {
             outputProvider.Write("Please enter your solution:");
             var guess = inputProvider.Read();
+
+            if (guess.ToLower() == TemporaryPuzzle.ToLower())
+            {
+                message = "Congratulations! You solved the puzzle!";
+                currentDashPuzzle = TemporaryPuzzle;
+
+                DrawPuzzle();
+                GameState = GameState.GameOver;
+            }
+            else
+            {
+                message = "Sorry, that is not the correct solution!";
+            }
         }
         public void GuessLetter()
         {
@@ -164,9 +178,6 @@ namespace LeapWoF
                 message = "Sorry, that letter is not in the puzzle!";
             }
     
-
-        
-
             charGuessList.Add(guess);
         }
 
