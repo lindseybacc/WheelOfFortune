@@ -24,8 +24,8 @@ namespace LeapWoF
         /// </summary>
         private IOutputProvider outputProvider;
         
-        private string currentDashPuzzle;
-
+        public string currentDashPuzzle;
+        private string message = "";
         private string TemporaryPuzzle;
 
         public List<string> charGuessList = new List<string>();
@@ -78,6 +78,7 @@ namespace LeapWoF
         public void StartNewRound()
         {
             TemporaryPuzzle = "Hello world";
+            currentDashPuzzle = Regex.Replace(TemporaryPuzzle, "[a-zA-Z]", "_");
 
             // update the game state
             GameState = GameState.RoundStarted;
@@ -110,8 +111,7 @@ namespace LeapWoF
         private void DrawPuzzle()
         {
             outputProvider.WriteLine("The puzzle is:");
-            
-            currentDashPuzzle = Regex.Replace(TemporaryPuzzle,"[a-zA-Z]", "_");
+            outputProvider.WriteLine(message);
             outputProvider.WriteLine(currentDashPuzzle);
 
             outputProvider.WriteLine();
@@ -135,7 +135,38 @@ namespace LeapWoF
         public void GuessLetter()
         {
             outputProvider.Write("Please guess a letter: ");
-            var guess = inputProvider.Read();
+            var guess = inputProvider.Read().ToLower();
+
+
+            if (guess.Length != 1)
+            {
+                message = "Hey please choose one letter!";
+            } else if (charGuessList.Contains(guess))
+            {
+                message = "You already guessed that letter!";
+            }
+            else if (TemporaryPuzzle.ToLower().Contains(guess))
+            {
+                for (int i = 0; i < TemporaryPuzzle.Length; i++)
+                {    
+                    if (TemporaryPuzzle[i].ToString().ToLower() == guess)
+                    {
+                        currentDashPuzzle = currentDashPuzzle.Remove(i, 1).Insert(i, TemporaryPuzzle[i].ToString());
+
+                    }
+
+                }
+
+                message = "You guessed correctly!";
+            }
+            else
+            {
+                message = "Sorry, that letter is not in the puzzle!";
+            }
+    
+
+        
+
             charGuessList.Add(guess);
         }
 
