@@ -27,6 +27,9 @@ namespace LeapWoF
         public string currentDashPuzzle;
         private string message = "";
         private string TemporaryPuzzle;
+        private int CurrentTotal = 0;
+        private int[] values = { 100, 300, 500, 1000, 0 };
+        private string[] messages = { "Hello World", "You are a Leaper", "The more you plan the less you recode"};
 
         public List<string> charGuessList = new List<string>();
 
@@ -77,7 +80,8 @@ namespace LeapWoF
         }
         public void StartNewRound()
         {
-            TemporaryPuzzle = "Hello world";
+            Random random = new Random();
+            TemporaryPuzzle = messages[random.Next(0, 3)];
             currentDashPuzzle = Regex.Replace(TemporaryPuzzle, "[a-zA-Z]", "_");
 
             // update the game state
@@ -111,10 +115,10 @@ namespace LeapWoF
         /// </summary>
         private void DrawPuzzle()
         {
-            outputProvider.WriteLine("The puzzle is:");
+            outputProvider.WriteLine("The puzzle is: " + currentDashPuzzle);
             outputProvider.WriteLine(message);
-            outputProvider.WriteLine(currentDashPuzzle);
-
+            outputProvider.WriteLine();
+            outputProvider.WriteLine("Your Total Money: $" + CurrentTotal);
             outputProvider.WriteLine();
         }
 
@@ -123,62 +127,80 @@ namespace LeapWoF
         /// </summary>
         public void Spin()
         {
-            outputProvider.WriteLine("Spinning the wheel...");
-            //TODO - Implement wheel + possible wheel spin outcomes
-            GuessLetter();
+            Random random = new Random();
+            int temp_money = random.Next(0, 5);
+            outputProvider.WriteLine("Spinning the wheel for..." + "  $" + values[temp_money]);
+            GuessLetter(temp_money);
+        
         }
-
-        public void Solve()
+        public void checkSolve(string guess)
         {
-            outputProvider.Write("Please enter your solution:");
-            var guess = inputProvider.Read();
-
             if (guess.ToLower() == TemporaryPuzzle.ToLower())
             {
+                outputProvider.Clear();
                 message = "Congratulations! You solved the puzzle!";
+
                 currentDashPuzzle = TemporaryPuzzle;
 
                 DrawPuzzle();
                 GameState = GameState.GameOver;
             }
+        }
+        public void Solve()
+        {
+            outputProvider.Write("Please enter your solution:");
+            var guess = inputProvider.Read();
+
+           checkSolve(guess);
+
+           message = "Sorry, that is not the correct solution!";
+        }
+        public void GuessLetter(int temp_money)
+        {
+            if (temp_money == 4)
+            {
+                message = "Bankrupt!";
+                CurrentTotal = 0;
+            }
             else
             {
-                message = "Sorry, that is not the correct solution!";
-            }
-        }
-        public void GuessLetter()
-        {
-            outputProvider.Write("Please guess a letter: ");
-            var guess = inputProvider.Read().ToLower();
+                outputProvider.Write("Please guess a letter: ");
+                var guess = inputProvider.Read().ToLower();
 
+                int counter = 0;
 
-            if (guess.Length != 1)
-            {
-                message = "Hey please choose one letter!";
-            } else if (charGuessList.Contains(guess))
-            {
-                message = "You already guessed that letter!";
-            }
-            else if (TemporaryPuzzle.ToLower().Contains(guess))
-            {
-                for (int i = 0; i < TemporaryPuzzle.Length; i++)
-                {    
-                    if (TemporaryPuzzle[i].ToString().ToLower() == guess)
+                if (guess.Length != 1)
+                {
+                    message = "Hey please choose one letter!";
+                }
+                else if (charGuessList.Contains(guess))
+                {
+                    message = "You already guessed that letter!";
+                }
+                else if (TemporaryPuzzle.ToLower().Contains(guess))
+                {
+                    for (int i = 0; i < TemporaryPuzzle.Length; i++)
                     {
-                        currentDashPuzzle = currentDashPuzzle.Remove(i, 1).Insert(i, TemporaryPuzzle[i].ToString());
+                        if (TemporaryPuzzle[i].ToString().ToLower() == guess)
+                        {
+                            currentDashPuzzle = currentDashPuzzle.Remove(i, 1).Insert(i, TemporaryPuzzle[i].ToString());
 
+                            counter += 1;
+                        }
                     }
 
+                    CurrentTotal += values[temp_money] * counter;
+
+                    message = "You guessed correctly!";
+                    checkSolve(currentDashPuzzle);
+                }
+                else
+                {
+                    message = "Sorry, that letter is not in the puzzle!";
                 }
 
-                message = "You guessed correctly!";
+                charGuessList.Add(guess);
             }
-            else
-            {
-                message = "Sorry, that letter is not in the puzzle!";
-            }
-    
-            charGuessList.Add(guess);
         }
 
         /// <summary>
@@ -186,7 +208,6 @@ namespace LeapWoF
         /// </summary>
         public void InitGame()
         {
-
             outputProvider.WriteLine("Welcome to Wheel of Fortune!");
             StartNewRound();
         }
